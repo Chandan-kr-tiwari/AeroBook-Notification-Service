@@ -1,27 +1,61 @@
-const { ConnectRabbitMq} = require("../config");
+const { ConnectRabbitMq } = require("../config");
 
 const startNotificationConsumer = async () => {
-  const connection = await ConnectRabbitMq();
+    const connection = await ConnectRabbitMq();
 
-  const channel = await connection.createChannel();
+    const channel = await connection.createChannel();
 
-  const queue = "notification_queue";
+    const exchange = "app.events";
+    const queue = "notification_queue";
 
-  await channel.assertQueue(queue, {
-    durable: true,
-  });
+    // Make sure exchange exists
+    await channel.assertExchange(exchange, "topic", {
+        durable: true
+    });
 
-  console.log(`Listening for messages on ${queue}`);
+    // Create notification queue
+    await channel.assertQueue(queue, {
+        durable: true
+    });
 
-  channel.consume(queue, (message) => {
-    if (message) {
-      const data = JSON.parse(message.content.toString());
+    // Bind queue to events we want
+    await channel.bindQueue(
+        queue,
+        exchange,
+        "booking.confirmed"
+    );
 
-      console.log("Notification received:", data);
+    await channel.bindQueue(
+        queue,
+        exchange,
+        "booking.cancelled"
+    );
 
-      channel.ack(message);
-    }
-  });
+    await channel.bindQueue(
+        queue,
+        exchange,
+        "payment.successful"
+    );
+
+    await channel.bindQueue(
+        queue,
+        exchange,
+        "payment.refunded"
+    );
+
+    console.log(`Listening for messages on ${queue}`);
+
+    channel.consume(queue, (message) => {
+        if (message) {
+            const event = JSON.parse(
+                message.content.toString()
+            );
+
+            console.log("Notification received:", event);
+
+            channel.ack(message);
+        }
+    });
 };
 
 module.exports = startNotificationConsumer;
