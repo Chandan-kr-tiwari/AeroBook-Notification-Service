@@ -1,15 +1,15 @@
 const { NotificationRepository } = require('../repositories');
-const { Mailer } = require('../config');
+const { ServerConfig } = require('../config');
+const sendEmail = require('./email-service');
 
 const notiRepo = new NotificationRepository();
 
-async function sendEmail(mailFrom, mailTo, subject, text) {
+async function sendNotificationEmail({ to, subject, html }) {
     try {
-        const response = await Mailer.sendMail({
-            from: mailFrom,
-            to: mailTo,
+        const response = await sendEmail({
+            to,
             subject,
-            text
+            html
         });
 
         return response;
@@ -39,8 +39,28 @@ async function getPendingEmails() {
     }
 }
 
+async function getUser(userId) {
+    try {
+        const response = await fetch(
+            `${ServerConfig.AEROBOOK_USER_SERVICE}/api/v1/users/${userId}`
+        );
+
+        if (!response.ok) {
+            throw new Error('Unable to fetch user');
+        }
+
+        const result = await response.json();
+
+        return result.data;
+    } catch (error) {
+        console.log('GET USER ERROR:', error.message);
+        throw error;
+    }
+}
+
 module.exports = {
-    sendEmail,
+    sendNotificationEmail,
     createMail,
-    getPendingEmails
+    getPendingEmails,
+    getUser
 };

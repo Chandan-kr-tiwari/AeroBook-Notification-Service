@@ -1,6 +1,8 @@
 const { ConnectRabbitMq } = require("../config");
+const { NotificationEventHandler } = require("../services");
 
 const startNotificationConsumer = async () => {
+
     const connection = await ConnectRabbitMq();
 
     const channel = await connection.createChannel();
@@ -8,17 +10,20 @@ const startNotificationConsumer = async () => {
     const exchange = "app.events";
     const queue = "notification_queue";
 
-    // Make sure exchange exists
     await channel.assertExchange(exchange, "topic", {
         durable: true
     });
 
-    // Create notification queue
     await channel.assertQueue(queue, {
         durable: true
     });
 
-    // Bind queue to events we want
+    await channel.bindQueue(
+        queue,
+        exchange,
+        "user.registered"
+    );
+
     await channel.bindQueue(
         queue,
         exchange,
@@ -45,15 +50,34 @@ const startNotificationConsumer = async () => {
 
     console.log(`Listening for messages on ${queue}`);
 
-    channel.consume(queue, (message) => {
-        if (message) {
+    channel.consume(queue, async (message) => {
+
+        if (!message) return;
+
+        try {
+
             const event = JSON.parse(
                 message.content.toString()
             );
 
-            console.log("Notification received:", event);
+            console.log(
+                "Notification received:",
+                event
+            );
+
+            await NotificationEventHandler(event);
 
             channel.ack(message);
+
+        } catch (error) {
+
+            console.error(
+                "Notification processing failed:",
+                error.message
+            );
+
+            // Don't acknowledge failed messages
+            channel.nack(message, false, true);
         }
     });
 };
