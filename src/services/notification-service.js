@@ -38,11 +38,10 @@ async function getPendingEmails() {
         throw error;
     }
 }
-
 async function getUser(userId) {
     try {
         const response = await fetch(
-            `${ServerConfig.AEROBOOK_USER_SERVICE}/api/v1/users/${userId}`
+            `${ServerConfig.AEROBOOK_USER_SERVICE}/api/v1/users/internal/${userId}`
         );
 
         if (!response.ok) {
