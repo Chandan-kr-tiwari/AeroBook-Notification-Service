@@ -4,8 +4,7 @@ const {BookingCancelledTemplate , BookingConfirmedTemplate , PaymentRefundedTemp
        PaymentSuccessfulTemplate , UserRegisteredTemplate
 } = require('../templates')
 
-
-async function processEvent(event) {
+async function NotificationEventHandler(event) {
 
     const { eventType, data } = event;
 
@@ -21,12 +20,11 @@ async function processEvent(event) {
 
             text = UserRegisteredTemplate(data);
 
-            await NotificationService.sendEmail(
-                process.env.GMAIL_EMAIL,
-                data.email,
+            await NotificationService.sendNotificationEmail({
+                to: data.email,
                 subject,
-                text
-            );
+                html: text
+            });
 
             break;
 
@@ -42,12 +40,11 @@ async function processEvent(event) {
                 name: user.name
             });
 
-            await NotificationService.sendEmail(
-                process.env.GMAIL_EMAIL,
-                user.email,
+            await NotificationService.sendNotificationEmail({
+                to: user.email,
                 subject,
-                text
-            );
+                html: text
+            });
 
             break;
 
@@ -63,12 +60,11 @@ async function processEvent(event) {
                 name: user.name
             });
 
-            await NotificationService.sendEmail(
-                process.env.GMAIL_EMAIL,
-                user.email,
+            await NotificationService.sendNotificationEmail({
+                to: user.email,
                 subject,
-                text
-            );
+                html: text
+            });
 
             break;
 
@@ -84,12 +80,11 @@ async function processEvent(event) {
                 name: user.name
             });
 
-            await NotificationService.sendEmail(
-                process.env.GMAIL_EMAIL,
-                user.email,
+            await NotificationService.sendNotificationEmail({
+                to: user.email,
                 subject,
-                text
-            );
+                html: text
+            });
 
             break;
 
@@ -105,12 +100,11 @@ async function processEvent(event) {
                 name: user.name
             });
 
-            await NotificationService.sendEmail(
-                process.env.GMAIL_EMAIL,
-                user.email,
+            await NotificationService.sendNotificationEmail({
+                to: user.email,
                 subject,
-                text
-            );
+                html: text
+            });
 
             break;
 
@@ -120,6 +114,7 @@ async function processEvent(event) {
     }
 }
 
+
 module.exports = {
-    processEvent
+    NotificationEventHandler
 };

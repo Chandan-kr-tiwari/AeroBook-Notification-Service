@@ -2,7 +2,7 @@ const {Mailer} = require('../config')
 
 const sendEmail = async ({ to, subject, html }) => {
 
-    await Mailer.sendEmail({
+    await Mailer.sendMail({
         from: process.env.GMAIL_EMAIL,
         to,
         subject,
