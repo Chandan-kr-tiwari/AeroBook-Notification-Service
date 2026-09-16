@@ -29,15 +29,7 @@ async function createMail(data) {
     }
 }
 
-async function getPendingEmails() {
-    try {
-        const response = await notiRepo.getPendingNotification();
-        return response;
-    } catch (error) {
-        console.log(error);
-        throw error;
-    }
-}
+
 async function getUser(userId) {
     try {
         const response = await fetch(
@@ -60,6 +52,6 @@ async function getUser(userId) {
 module.exports = {
     sendNotificationEmail,
     createMail,
-    getPendingEmails,
+    
     getUser
 };
